@@ -360,7 +360,7 @@ Password: atharva123
 *Detailed property view with image gallery, videos, and booking form*
 
 ### Admin Dashboard
-![Admin Dashboard](static/images/adi.png)
+![Admin Dashboard](static/images/admin.png)
 *Comprehensive analytics and statistics*
 
 ### User Dashboard
@@ -496,7 +496,7 @@ class Booking(db.Model):
 
 Navigate to: `http://localhost:8000/admin/login`
 
-![Admin Login](https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop)
+![Admin Login](static/images/admin_login.png)
 
 ### Admin Features
 
@@ -544,7 +544,7 @@ Navigate to: `http://localhost:8000/admin/login`
 
 Access at: `http://localhost:8000/user/dashboard`
 
-![User Dashboard](https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=400&fit=crop)
+![User Dashboard](static/images/user.png)
 
 #### ❤️ Favorites
 - Save favorite properties
@@ -628,88 +628,7 @@ pytest tests/
 
 ---
 
-## 🚀 Deployment
 
-### Deploy to Heroku
-
-```bash
-# Install Heroku CLI
-# Login to Heroku
-heroku login
-
-# Create new app
-heroku create your-app-name
-
-# Add PostgreSQL
-heroku addons:create heroku-postgresql:hobby-dev
-
-# Set environment variables
-heroku config:set SECRET_KEY=your-secret-key
-heroku config:set ADMIN_USERNAME=admin
-heroku config:set ADMIN_PASSWORD=your-secure-password
-
-# Deploy
-git push heroku main
-
-# Run migrations
-heroku run python seed_data.py
-```
-
-### Deploy to AWS/DigitalOcean
-
-1. Set up Ubuntu server
-2. Install Python, pip, and virtualenv
-3. Clone repository
-4. Install dependencies
-5. Configure Nginx as reverse proxy
-6. Set up Gunicorn
-7. Configure SSL with Let's Encrypt
-8. Set up PostgreSQL database
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-### How to Contribute
-
-1. **Fork the repository**
-   ```bash
-   # Fork on GitHub, then clone
-   git clone https://github.com/YOUR-USERNAME/Real-Estate-Website.git
-   ```
-
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-
-3. **Make your changes**
-   - Write clean, documented code
-   - Follow existing code style
-   - Add tests if applicable
-
-4. **Commit your changes**
-   ```bash
-   git commit -m 'Add some AmazingFeature'
-   ```
-
-5. **Push to the branch**
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-
-6. **Open a Pull Request**
-
-### Development Guidelines
-
-- Follow PEP 8 style guide for Python
-- Write clear commit messages
-- Update documentation for new features
-- Test your changes thoroughly
-
----
 
 ## 📝 License
 
@@ -729,14 +648,6 @@ copies of the Software...
 
 ---
 
-## 👨‍💻 Author
-
-**Atharva**
-
-- GitHub: [@Atharva0177](https://github.com/Atharva0177)
-- Repository: [Real-Estate-Website](https://github.com/Atharva0177/Real-Estate-Website)
-
----
 
 ## 🙏 Acknowledgments
 
@@ -748,30 +659,6 @@ copies of the Software...
 
 ---
 
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/Atharva0177/Real-Estate-Website/issues) page
-2. Create a new issue with detailed description
-3. Contact via repository discussions
-
----
-
-## 🔄 Changelog
-
-### Version 1.0.0 (2025-11-07)
-- ✅ Initial release
-- ✅ Property CRUD operations
-- ✅ User authentication system
-- ✅ Booking system
-- ✅ Admin dashboard
-- ✅ Favorites and alerts
-- ✅ Analytics and reporting
-- ✅ File upload support
-- ✅ Responsive design
-
----
 
 ## 🎯 Future Enhancements
 
@@ -802,12 +689,5 @@ If you encounter any issues or have questions:
 
 ---
 
-<div align="center">
 
-### ⭐ Star this repository if you find it helpful!
 
-**Made with ❤️ by Atharva**
-
-[Back to Top](#-real-estate-website---complete-property-management-platform)
-
-</div>
