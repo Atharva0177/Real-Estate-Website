@@ -6,12 +6,15 @@ from config import Config
 from models import db, Property, PropertyImage, PropertyVideo, PropertyDocument, Enquiry, Admin, User, Favorite, PropertyAlert, Booking, ActivityLog
 from forms import PropertyForm, EnquiryForm, LoginForm, UserRegistrationForm, UserLoginForm, PropertyAlertForm, BookingForm
 from functools import wraps
+from flask_mail import Mail
+from helpers.notifications import send_email  # use send_email helper
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Initialize database
+# Initialize database and mail
 db.init_app(app)
+mail = Mail(app)
 
 
 # Make datetime and other utilities available to all templates
@@ -23,8 +26,10 @@ def inject_globals():
         'timedelta': timedelta
     }
 
-# Create upload directories
-os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'images'), exist_ok=True)
+# Expose app config to templates (used for GOOGLE_MAPS_API_KEY checks)
+@app.context_processor
+def inject_config():
+    return {'config': app.config}
 
 # Create upload directories
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'images'), exist_ok=True)
@@ -59,24 +64,27 @@ def save_uploaded_file(file, subfolder='images'):
         filename = secure_filename(file.filename)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
         filename = timestamp + filename
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], subfolder, filename)
+        target_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
+        os.makedirs(target_dir, exist_ok=True)
+        filepath = os.path.join(target_dir, filename)
         file.save(filepath)
         return f'uploads/{subfolder}/{filename}'
     return None
 
 def log_activity(action, description='', user_type='guest', user_id=None):
+    """Local activity logger for convenience (separate from helper)."""
     try:
         log = ActivityLog(
             action=action,
             description=description,
             user_type=user_type,
             user_id=user_id,
-            ip_address=request.remote_addr
+            ip_address=request.remote_addr if request else None
         )
         db.session.add(log)
         db.session.commit()
-    except:
-        pass
+    except Exception:
+        db.session.rollback()
 
 # PUBLIC ROUTES
 @app.route('/')
@@ -103,9 +111,9 @@ def properties():
         
         if property_type:
             query = query.filter_by(property_type=property_type)
-        if min_price:
+        if min_price is not None:
             query = query.filter(Property.price >= min_price)
-        if max_price:
+        if max_price is not None:
             query = query.filter(Property.price <= max_price)
         if location:
             query = query.filter(Property.location.contains(location))
@@ -151,20 +159,21 @@ def property_detail(id):
         ).limit(3).all()
         
         log_activity('view_property', f'Viewed property: {property.title}', 
-                    'user' if 'user_id' in session else 'guest',
-                    session.get('user_id'))
+                     'user' if 'user_id' in session else 'guest',
+                     session.get('user_id'))
         
         return render_template('property_detail.html', 
-                             property=property, 
-                             form=form, 
-                             booking_form=booking_form,
-                             related=related_properties,
-                             is_favorited=is_favorited,
-                             datetime=datetime)  # Add this line
+                               property=property, 
+                               form=form, 
+                               booking_form=booking_form,
+                               related=related_properties,
+                               is_favorited=is_favorited,
+                               datetime=datetime)
     except Exception as e:
         print(f"Error in property_detail route: {e}")
         return f"Error: {e}", 500
 
+# ENQUIRIES
 @app.route('/enquiry', methods=['POST'])
 def submit_enquiry():
     form = EnquiryForm()
@@ -178,12 +187,37 @@ def submit_enquiry():
         )
         db.session.add(enquiry)
         db.session.commit()
-        
-        log_activity('submit_enquiry', f'Enquiry from {form.name.data}')
-        
+
+        log_activity('submit_enquiry', f'Enquiry from {form.name.data}', 'user')
+
+        # Notify Admin (email)
+        send_email(
+            mail,
+            subject=f"New Property Enquiry #{enquiry.id}",
+            recipients=[app.config['MAIL_DEFAULT_SENDER']],
+            body=f"""New enquiry received:
+
+Name: {enquiry.name}
+Email: {enquiry.email}
+Phone: {enquiry.phone}
+Property: {enquiry.property.title if enquiry.property else 'General'}
+Message:
+{enquiry.message}
+
+Login to admin panel to respond.""",
+            category='enquiry'
+        )
+        # Acknowledge User (email)
+        send_email(
+            mail,
+            subject="We received your enquiry",
+            recipients=[enquiry.email],
+            body=f"Hi {enquiry.name},\n\nThank you for contacting Premium Estate. We will respond shortly.\n\nRegards,\nPremium Estate Team",
+            category='enquiry'
+        )
+
         flash('Thank you for your enquiry! We will contact you soon.', 'success')
         return redirect(request.referrer or url_for('index'))
-    
     flash('Please fill all required fields correctly.', 'error')
     return redirect(request.referrer or url_for('index'))
 
@@ -263,10 +297,10 @@ def user_dashboard():
     bookings = Booking.query.filter_by(user_id=session['user_id']).order_by(Booking.created_at.desc()).all()
     
     return render_template('user/dashboard.html', 
-                         user=user, 
-                         favorites=favorites, 
-                         alerts=alerts,
-                         bookings=bookings)
+                           user=user, 
+                           favorites=favorites, 
+                           alerts=alerts,
+                           bookings=bookings)
 
 # FAVORITES ROUTES
 @app.route('/favorite/toggle/<int:property_id>', methods=['POST'])
@@ -333,6 +367,45 @@ def delete_alert(alert_id):
     flash('Alert deleted successfully.', 'success')
     return redirect(url_for('user_dashboard'))
 
+def check_and_send_alerts(property):
+    """Notify users whose alerts match the new property (email + activity)."""
+    alerts = PropertyAlert.query.filter_by(is_active=True).all()
+    for alert in alerts:
+        match = True
+        if alert.property_type and alert.property_type != property.property_type:
+            match = False
+        if alert.min_price and property.price < alert.min_price:
+            match = False
+        if alert.max_price and property.price > alert.max_price:
+            match = False
+        if alert.location and alert.location.lower() not in (property.location or '').lower():
+            match = False
+
+        if match:
+            user = User.query.get(alert.user_id)
+            if user and user.email:
+                send_email(
+                    mail,
+                    subject="New property matches your alert",
+                    recipients=[user.email],
+                    body=f"""Hi {user.name},
+
+A new property matches your alert:
+
+Title: {property.title}
+Type: {property.property_type}
+Location: {property.location}
+Area: {property.area} sq ft
+Price: ₹{property.price:,.0f}
+
+View: {url_for('property_detail', id=property.id, _external=True)}
+
+You can manage alerts in your dashboard.
+""",
+                    category='alert'
+                )
+            log_activity('alert_triggered', f'Alert triggered for user {alert.user_id}: {property.title}', 'system')
+
 # BOOKING ROUTES
 @app.route('/booking/create/<int:property_id>', methods=['POST'])
 @user_login_required
@@ -356,6 +429,33 @@ def create_booking(property_id):
         db.session.commit()
         
         log_activity('create_booking', f'Booking for {property.title}', 'user', session['user_id'])
+
+        # Email notifications
+        # Admin
+        send_email(
+            mail,
+            subject=f"New Site Visit Booking #{booking.id}",
+            recipients=[app.config['MAIL_DEFAULT_SENDER']],
+            body=f"""New site visit booked:
+
+Visitor: {booking.visitor_name}
+Email: {booking.visitor_email}
+Phone: {booking.visitor_phone}
+Property: {property.title}
+Date: {booking.booking_date.strftime('%d %b %Y')}
+Time Slot: {booking.booking_time}
+Visitors: {booking.number_of_visitors}
+Message: {booking.message or '(none)'}""",
+            category='booking'
+        )
+        # User
+        send_email(
+            mail,
+            subject="Your site visit booking is pending confirmation",
+            recipients=[booking.visitor_email],
+            body=f"Hi {booking.visitor_name},\n\nThanks for booking a site visit for '{property.title}' on {booking.booking_date.strftime('%d %b %Y')} at {booking.booking_time}. We will confirm soon.\n\nRegards,\nPremium Estate Team",
+            category='booking'
+        )
         
         flash('Site visit booked successfully! We will confirm shortly.', 'success')
         return redirect(url_for('property_detail', id=property_id))
@@ -375,6 +475,15 @@ def cancel_booking(booking_id):
     db.session.commit()
     
     log_activity('cancel_booking', f'Cancelled booking #{booking_id}', 'user', session['user_id'])
+
+    # Notify user (self-notification optional)
+    send_email(
+        mail,
+        subject=f"Booking #{booking.id} Cancelled",
+        recipients=[booking.visitor_email],
+        body=f"Hi {booking.visitor_name},\n\nYour booking for '{booking.property.title}' has been cancelled as requested.\n\nRegards,\nPremium Estate Team",
+        category='booking'
+    )
     
     flash('Booking cancelled successfully.', 'success')
     return redirect(url_for('user_dashboard'))
@@ -397,8 +506,8 @@ def download_document(doc_id):
     file_path = os.path.join('static', document.document_url)
     
     log_activity('download_document', f'Downloaded: {document.document_name}',
-                'user' if 'user_id' in session else 'guest',
-                session.get('user_id'))
+                 'user' if 'user_id' in session else 'guest',
+                 session.get('user_id'))
     
     return send_file(file_path, as_attachment=True, download_name=document.document_name)
 
@@ -458,7 +567,7 @@ def admin_dashboard():
             'sold': sold_properties,
             'enquiries': new_enquiries,
             'users': total_users,
-            # NOTE: this key is referenced by the dashboard as Pending Visits
+            # Used on dashboard as "Pending Visits"
             'bookings': pending_bookings,
             'views': total_views,
             'shares': total_shares
@@ -467,7 +576,6 @@ def admin_dashboard():
         return render_template(
             'admin/dashboard.html',
             stats=stats,
-            # names used by the dashboard template
             properties=recent_properties,
             enquiries=recent_enquiries,
             bookings=recent_bookings,
@@ -476,6 +584,19 @@ def admin_dashboard():
     except Exception as e:
         print(f"Error in admin_dashboard route: {e}")
         return f"Error: {e}", 500
+
+# Optional: Admin quick test email trigger
+@app.route('/admin/test-email')
+@admin_login_required
+def admin_test_email():
+    ok = send_email(
+        mail,
+        subject="Test Email from Premium Estate Admin",
+        recipients=[app.config['MAIL_DEFAULT_SENDER']],
+        body="This is a test email generated from the admin panel."
+    )
+    flash("Test email sent." if ok else "Test email failed.", "success" if ok else "error")
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/properties')
 @admin_login_required
@@ -545,7 +666,7 @@ def admin_add_property():
                             
                             prop_doc = PropertyDocument(
                                 property_id=property.id,
-                                document_name=document.filename,
+                                document_name=secure_filename(document.filename),
                                 document_url=doc_path,
                                 document_type=document.filename.rsplit('.', 1)[1].upper(),
                                 file_size=file_size_str
@@ -556,7 +677,7 @@ def admin_add_property():
             
             log_activity('add_property', f'Added property: {property.title}', 'admin')
             
-            # Check and send alerts to users
+            # Notify alerts
             check_and_send_alerts(property)
             
             flash('Property added successfully!', 'success')
@@ -567,29 +688,6 @@ def admin_add_property():
             print(f"Error: {e}")
     
     return render_template('admin/add_property.html', form=form)
-
-def check_and_send_alerts(property):
-    """Check if property matches any user alerts and notify them"""
-    alerts = PropertyAlert.query.filter_by(is_active=True).all()
-    
-    for alert in alerts:
-        match = True
-        
-        if alert.property_type and alert.property_type != property.property_type:
-            match = False
-        
-        if alert.min_price and property.price < alert.min_price:
-            match = False
-        
-        if alert.max_price and property.price > alert.max_price:
-            match = False
-        
-        if alert.location and alert.location.lower() not in property.location.lower():
-            match = False
-        
-        if match:
-            # In a real application, send email notification here
-            log_activity('alert_triggered', f'Alert triggered for user {alert.user_id}: {property.title}', 'system')
 
 @app.route('/admin/property/edit/<int:id>', methods=['GET', 'POST'])
 @admin_login_required
@@ -624,20 +722,21 @@ def admin_edit_property(id):
                             )
                             db.session.add(prop_image)
             
-            # Handle video URLs
-            if form.video_urls.data:
+            # Handle video URLs (replace existing)
+            if form.video_urls.data is not None:
                 PropertyVideo.query.filter_by(property_id=property.id).delete()
-                video_urls = form.video_urls.data.strip().split('\n')
-                for url in video_urls:
-                    url = url.strip()
-                    if url:
-                        video_type = 'youtube' if 'youtube.com' in url or 'youtu.be' in url else 'vimeo'
-                        prop_video = PropertyVideo(
-                            property_id=property.id,
-                            video_url=url,
-                            video_type=video_type
-                        )
-                        db.session.add(prop_video)
+                if form.video_urls.data.strip():
+                    video_urls = form.video_urls.data.strip().split('\n')
+                    for url in video_urls:
+                        url = url.strip()
+                        if url:
+                            video_type = 'youtube' if 'youtube.com' in url or 'youtu.be' in url else 'vimeo'
+                            prop_video = PropertyVideo(
+                                property_id=property.id,
+                                video_url=url,
+                                video_type=video_type
+                            )
+                            db.session.add(prop_video)
             
             # Handle new document uploads
             if form.documents.data:
@@ -650,7 +749,7 @@ def admin_edit_property(id):
                             
                             prop_doc = PropertyDocument(
                                 property_id=property.id,
-                                document_name=document.filename,
+                                document_name=secure_filename(document.filename),
                                 document_url=doc_path,
                                 document_type=document.filename.rsplit('.', 1)[1].upper(),
                                 file_size=file_size_str
@@ -683,13 +782,13 @@ def admin_delete_property(id):
     for image in property.images:
         try:
             os.remove(os.path.join('static', image.image_url))
-        except:
+        except Exception:
             pass
     
     for document in property.documents:
         try:
             os.remove(os.path.join('static', document.document_url))
-        except:
+        except Exception:
             pass
     
     property_title = property.title
@@ -707,7 +806,7 @@ def admin_delete_image(id):
     image = PropertyImage.query.get_or_404(id)
     try:
         os.remove(os.path.join('static', image.image_url))
-    except:
+    except Exception:
         pass
     db.session.delete(image)
     db.session.commit()
@@ -722,7 +821,7 @@ def admin_delete_document(id):
     document = PropertyDocument.query.get_or_404(id)
     try:
         os.remove(os.path.join('static', document.document_url))
-    except:
+    except Exception:
         pass
     db.session.delete(document)
     db.session.commit()
@@ -748,13 +847,24 @@ def update_enquiry_status(id):
     enquiry = Enquiry.query.get_or_404(id)
     status = request.form.get('status')
     if status in ['New', 'Contacted', 'Closed']:
+        old = enquiry.status
         enquiry.status = status
         db.session.commit()
-        log_activity('update_enquiry_status', f'Updated enquiry #{id} to {status}', 'admin')
+        log_activity('update_enquiry_status', f'Updated enquiry #{id} {old} -> {status}', 'admin')
+
+        # Notify user about status change
+        send_email(
+            mail,
+            subject=f"Your enquiry status: {status}",
+            recipients=[enquiry.email],
+            body=f"Hi {enquiry.name},\n\nYour enquiry status has changed to {status}.\n\nRegards,\nPremium Estate Team",
+            category='enquiry'
+        )
+
         flash('Enquiry status updated!', 'success')
     return redirect(url_for('admin_enquiries', **request.args))
 
-# NEW: Delete enquiry
+# Delete enquiry
 @app.route('/admin/enquiry/delete/<int:id>', methods=['POST'])
 @admin_login_required
 def delete_enquiry(id):
@@ -782,13 +892,24 @@ def update_booking_status(id):
     booking = Booking.query.get_or_404(id)
     status = request.form.get('status')
     if status in ['Pending', 'Confirmed', 'Cancelled', 'Completed']:
+        old = booking.status
         booking.status = status
         db.session.commit()
-        log_activity('update_booking_status', f'Updated booking #{id} to {status}', 'admin')
+        log_activity('update_booking_status', f'Updated booking #{id} {old} -> {status}', 'admin')
+
+        # Notify user on booking status change
+        send_email(
+            mail,
+            subject=f"Booking #{booking.id} Status Updated",
+            recipients=[booking.visitor_email],
+            body=f"Hi {booking.visitor_name},\n\nYour booking for '{booking.property.title}' on {booking.booking_date.strftime('%d %b %Y')} changed from {old} to {status}.\n\nRegards,\nPremium Estate Team",
+            category='booking'
+        )
+
         flash('Booking status updated!', 'success')
     return redirect(url_for('admin_bookings', **request.args))
 
-# NEW: Delete booking
+# Delete booking
 @app.route('/admin/booking/delete/<int:id>', methods=['POST'])
 @admin_login_required
 def delete_booking(id):
@@ -834,13 +955,13 @@ def admin_analytics():
     top_properties = Property.query.order_by(Property.views.desc()).limit(5).all()
     
     return render_template('admin/analytics.html',
-                         total_properties=total_properties,
-                         total_users=total_users,
-                         total_bookings=total_bookings,
-                         total_enquiries=total_enquiries,
-                         property_types=property_types,
-                         monthly_properties=monthly_properties,
-                         top_properties=top_properties)
+                           total_properties=total_properties,
+                           total_users=total_users,
+                           total_bookings=total_bookings,
+                           total_enquiries=total_enquiries,
+                           property_types=property_types,
+                           monthly_properties=monthly_properties,
+                           top_properties=top_properties)
 
 # Error handlers
 @app.errorhandler(404)

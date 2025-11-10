@@ -10,7 +10,7 @@
   overflow:hidden;text-overflow:ellipsis;white-space:normal;
 }
 .table-actions{display:flex;gap:.5rem;align-items:center;}
-/* Modal styling (same as earlier suggestion) */
+/* Modal styling */
 .enquiry-modal{position:fixed;inset:0;display:none;z-index:10000;align-items:center;justify-content:center;}
 .enquiry-modal.open{display:flex;}
 .enquiry-modal .overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);}
@@ -86,7 +86,7 @@
                             <td>
                                 {% if enquiry.property %}
                                 <a href="{{ url_for('property_detail', id=enquiry.property.id) }}" target="_blank">
-                                    {{ enquiry.property.title[:40] }}...
+                                    {{ enquiry.property.title[:40] }}{% if enquiry.property.title|length>40 %}...{% endif %}
                                 </a>
                                 {% else %} General Enquiry {% endif %}
                             </td>
@@ -94,7 +94,7 @@
                             <td><span class="status-badge status-{{ enquiry.status.lower() }}">{{ enquiry.status }}</span></td>
                             <td>{{ enquiry.created_at.strftime('%d %b %Y') }}</td>
                             <td class="table-actions">
-                                <button class="btn btn-secondary btn-sm btn-view-enquiry"
+                                <button class="btn btn-view btn-sm btn-view-enquiry"
                                     data-name="{{ enquiry.name }}"
                                     data-email="{{ enquiry.email }}"
                                     data-phone="{{ enquiry.phone }}"
@@ -109,11 +109,10 @@
                                         <option value="Closed" {% if enquiry.status == 'Closed' %}selected{% endif %}>Closed</option>
                                     </select>
                                 </form>
-                                <!-- NEW: Delete -->
-                                <form method="post" action="{{ url_for('delete_enquiry', id=enquiry.id) }}" style="display:inline;" onsubmit="return confirm('Delete this booking?');">
-                                <button class="btn btn-danger btn-icon-sm" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <form method="post" action="{{ url_for('delete_enquiry', id=enquiry.id) }}" style="display:inline;" onsubmit="return confirm('Delete this enquiry?');">
+                                    <button class="btn btn-danger btn-icon-sm" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </form>
                             </td>
                         </tr>
@@ -169,7 +168,10 @@
       <div class="enquiry-full" id="em-message">-</div>
     </div>
     <div class="modal-actions">
-      <a id="em-mailto" href="#" class="btn btn-primary">Reply via Email</a>
+      <!-- Fixed: open mail client reliably -->
+      <a id="em-mailto" href="#" target="_blank" rel="noopener" class="btn btn-primary">
+        <i class="fas fa-reply"></i> Reply via Email
+      </a>
       <button type="button" class="btn btn-secondary" data-close>Close</button>
     </div>
   </div>
@@ -182,24 +184,73 @@
   const modal = document.getElementById('enquiryModal');
   const openBtns = document.querySelectorAll('.btn-view-enquiry');
   const closeEls = modal.querySelectorAll('[data-close]');
+  const mailtoBtn = document.getElementById('em-mailto');
+
+  function buildMailto(email, property, message, name){
+    if(!email) return '#';
+    const subj = encodeURIComponent(`Regarding your enquiry about "${property || 'our property'}"`);
+    const body = encodeURIComponent(
+      `Hi ${name || ''},\r\n\r\n` +
+      `Thank you for your enquiry about "${property || ''}".\r\n\r\n` +
+      `Original message:\r\n${message || ''}\r\n\r\n` +
+      `Reply below this line:\r\n\r\n` +
+      `--\r\nAdmin Team\r\nPremium Estate`
+    );
+    // Do not encode the email address itself
+    return `mailto:${email}?subject=${subj}&body=${body}`;
+  }
+
   function open(data){
-    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    modal.classList.add('open'); 
+    modal.setAttribute('aria-hidden','false');
+
     document.getElementById('em-name').textContent = data.name || '-';
     document.getElementById('em-email').textContent = data.email || '-';
     document.getElementById('em-phone').textContent = data.phone || '-';
     document.getElementById('em-property').textContent = data.property || '-';
     document.getElementById('em-message').textContent = data.message || '-';
-    const mail = encodeURIComponent(data.email || '');
-    const body = encodeURIComponent(`Regarding your enquiry for "${data.property}":\n\n${data.message}\n\n— Admin`);
-    document.getElementById('em-mailto').href = `mailto:${mail}?subject=Regarding your enquiry&body=${body}`;
+
+    // Build and set mailto link
+    mailtoBtn.href = buildMailto(data.email, data.property, data.message, data.name);
+
     document.body.style.overflow = 'hidden';
   }
-  function close(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; }
-  openBtns.forEach(btn=>btn.addEventListener('click', ()=>open({
-    name: btn.dataset.name, email: btn.dataset.email, phone: btn.dataset.phone, property: btn.dataset.property, message: btn.dataset.message
-  })));
+
+  function close(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true'); 
+    document.body.style.overflow = '';
+    mailtoBtn.href = '#';
+  }
+
+  // Open handlers
+  openBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      open({
+        name: btn.dataset.name, 
+        email: btn.dataset.email, 
+        phone: btn.dataset.phone, 
+        property: btn.dataset.property, 
+        message: btn.dataset.message
+      });
+    });
+  });
+
+  // Close handlers
   closeEls.forEach(el=>el.addEventListener('click', close));
   window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+
+  // Defensive click to force navigation if some envs ignore anchor default
+  mailtoBtn.addEventListener('click', function(e){
+    const href = this.getAttribute('href');
+    if(!href || href === '#'){
+      e.preventDefault();
+      return;
+    }
+    // Some browsers handle mailto better via direct location setting
+    // Allow the default first; if nothing happens, this ensures navigation
+    setTimeout(()=>{ try { window.location.href = href; } catch(_){} }, 0);
+  });
 })();
 </script>
 {% endblock %}

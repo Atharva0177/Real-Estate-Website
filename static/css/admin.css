@@ -1,11 +1,28 @@
-/* Admin Login Page */
+/* ==========================================================
+   Global Reset & Box Sizing Fixes
+   ========================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ==========================================================
+   Admin Login Page
+   ========================================================== */
 .login-body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Poppins', sans-serif;
 }
 
 .login-container {
@@ -58,7 +75,6 @@
     padding: 0.8rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
     transition: all 0.3s ease;
 }
 
@@ -95,7 +111,9 @@
     border: 1px solid #cfc;
 }
 
-/* Admin Layout */
+/* ==========================================================
+   Admin Layout
+   ========================================================== */
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -136,6 +154,7 @@
     color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
     position: relative;
+    cursor: pointer;
 }
 
 .nav-item i {
@@ -171,6 +190,8 @@
     flex: 1;
     margin-left: 260px;
     background: #f5f6fa;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .admin-header {
@@ -180,6 +201,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .admin-header h1 {
@@ -202,14 +224,19 @@
 
 .admin-content {
     padding: 2rem;
+    max-width: 100%;
+    overflow-x: auto;
 }
 
-/* Stats Cards */
+/* ==========================================================
+   Stats Cards
+   ========================================================== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+    max-width: 100%;
 }
 
 .stat-card {
@@ -266,13 +293,17 @@
     font-size: 0.95rem;
 }
 
-/* Dashboard Section */
+/* ==========================================================
+   Dashboard Section
+   ========================================================== */
 .dashboard-section {
     background: white;
     border-radius: 15px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .section-header {
@@ -280,6 +311,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .section-header h2 {
@@ -287,14 +319,18 @@
     font-size: 1.5rem;
 }
 
-/* Tables */
+/* ==========================================================
+   Tables
+   ========================================================== */
 .table-responsive {
     overflow-x: auto;
+    width: 100%;
 }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
 }
 
 .admin-table thead {
@@ -360,6 +396,7 @@
 .action-buttons {
     display: flex;
     gap: 0.5rem;
+    
 }
 
 .btn-icon {
@@ -379,12 +416,15 @@
     color: white;
 }
 
-/* Forms */
+/* ==========================================================
+   Forms
+   ========================================================== */
 .form-container {
     background: white;
     border-radius: 15px;
     padding: 2rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
 }
 
 .property-form .form-section {
@@ -419,7 +459,6 @@
     padding: 0.8rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
     transition: all 0.3s ease;
 }
 
@@ -460,11 +499,14 @@
     margin-top: 2rem;
 }
 
-/* Image Grid */
+/* ==========================================================
+   Image Grid
+   ========================================================== */
 .image-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
+    max-width: 100%;
 }
 
 .image-item {
@@ -502,7 +544,9 @@
     opacity: 1;
 }
 
-/* Filter Buttons */
+/* ==========================================================
+   Filter Buttons
+   ========================================================== */
 .filter-buttons {
     display: flex;
     gap: 0.5rem;
@@ -512,11 +556,12 @@
     padding: 0.4rem 0.8rem;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
     cursor: pointer;
 }
 
-/* Modal */
+/* ==========================================================
+   Modal
+   ========================================================== */
 .modal {
     display: none;
     position: fixed;
@@ -557,13 +602,18 @@
 .btn-danger {
     background: #e74c3c;
     color: white;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
 }
 
 .btn-danger:hover {
     background: #c0392b;
 }
 
-/* Responsive Admin */
+/* ==========================================================
+   Responsive Fixes
+   ========================================================== */
 @media (max-width: 968px) {
     .admin-sidebar {
         transform: translateX(-100%);

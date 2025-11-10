@@ -4,623 +4,281 @@
 
 {% block extra_css %}
 <style>
-/* Contact Page Specific Styles */
 .contact-hero {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)),
-                url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1600') center/cover;
-    color: var(--white);
-    text-align: center;
-    padding: 8rem 0 4rem;
-    margin-top: 70px;
-    position: relative;
-    overflow: hidden;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color:#fff;
+  padding:4rem 0 3rem;
+  margin-top:70px;
 }
+.contact-hero h1 {font-size:2.5rem;margin:0 0 .8rem;font-weight:700;}
+.contact-hero p {font-size:1.05rem;opacity:.9;margin:0;}
 
-.contact-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 50%, transparent 20%, rgba(0,0,0,0.2));
-    animation: pulse 4s ease-in-out infinite;
-}
-
-.contact-hero-content {
-    position: relative;
-    z-index: 2;
-}
-
-.contact-hero h1 {
-    font-size: 3.5rem;
-    font-family: 'Playfair Display', serif;
-    margin-bottom: 1rem;
-    animation: fadeInUp 0.8s ease;
-}
-
-.contact-hero p {
-    font-size: 1.3rem;
-    opacity: 0.95;
-    animation: fadeInUp 0.8s ease 0.2s backwards;
-}
-
-.contact-main {
-    padding: 5rem 0;
-    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-}
-
+.contact-main {padding:3rem 0;background:#f5f6fa;}
 .contact-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 3rem;
-    max-width: 1200px;
-    margin: 0 auto;
+  display:grid;grid-template-columns:1.2fr 1fr;gap:2rem;max-width:1200px;margin:0 auto;
 }
-
-/* Contact Info Card */
-.contact-info-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 3rem;
-    border-radius: 25px;
-    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-    position: relative;
-    overflow: hidden;
-    animation: fadeInLeft 0.8s ease;
+@media (max-width:992px){.contact-wrapper{grid-template-columns:1fr}}
+.contact-info-card, .contact-form-card {
+  background:#fff;border-radius:20px;padding:2rem;box-shadow:0 5px 20px rgba(0,0,0,.08);
 }
-
-.contact-info-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
+.contact-info-card h2, .contact-form-card h2 {
+  font-size:1.6rem;margin:0 0 1rem;color:#2c3e50;font-weight:600;display:flex;align-items:center;gap:.6rem;
 }
+.contact-info-card p {color:#555;font-size:.9rem;line-height:1.6;margin:0 0 1.2rem;}
 
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.contact-info-card h2 {
-    font-size: 2.5rem;
-    font-family: 'Playfair Display', serif;
-    margin-bottom: 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-.contact-info-card > p {
-    font-size: 1.1rem;
-    opacity: 0.95;
-    margin-bottom: 3rem;
-    position: relative;
-    z-index: 1;
-}
-
-.info-items {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    position: relative;
-    z-index: 1;
-}
-
+.info-items {display:grid;gap:1rem;}
 .info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
+  display:flex;gap:1rem;background:#f7f9fc;padding:1rem;border-radius:15px;align-items:flex-start;
 }
-
-.info-box:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(10px);
-}
-
 .info-box-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    flex-shrink: 0;
+  width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex-shrink:0;
 }
+.info-box-content h4 {margin:0 0 .3rem;font-size:.95rem;color:#2c3e50;}
+.info-box-content span, .info-box-content a {display:block;font-size:.75rem;color:#555;text-decoration:none;word-break:break-word;}
+.info-box-content a:hover {color:#667eea;text-decoration:underline;}
 
-.info-box-content h4 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+.social-mini {display:flex;gap:.6rem;margin-top:.6rem;}
+.social-mini a {
+  width:34px;height:34px;border-radius:10px;background:#eef1f6;display:flex;align-items:center;justify-content:center;
+  color:#444;font-size:.9rem;transition:.3s;text-decoration:none;
 }
+.social-mini a:hover {background:#667eea;color:#fff;}
 
-.info-box-content p {
-    opacity: 0.9;
-    line-height: 1.6;
-}
+.contact-form-card p {color:#555;font-size:.9rem;line-height:1.5;margin:.2rem 0 1.2rem;}
+.contact-form {display:flex;flex-direction:column;gap:1rem;}
+.form-row {display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media (max-width:640px){.form-row{grid-template-columns:1fr}}
 
-.info-box-content a {
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.info-box-content a:hover {
-    opacity: 0.8;
-    margin-left: 5px;
-}
-
-.social-connect {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    z-index: 1;
-}
-
-.social-connect h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.social-icons {
-    display: flex;
-    gap: 1rem;
-}
-
-.social-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    transition: all 0.3s ease;
-}
-
-.social-icon:hover {
-    background: white;
-    color: #667eea;
-    transform: translateY(-5px);
-}
-
-/* Contact Form Card */
-.contact-form-card {
-    background: white;
-    padding: 3rem;
-    border-radius: 25px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    animation: fadeInRight 0.8s ease;
-}
-
-.contact-form-card h2 {
-    font-size: 2.5rem;
-    font-family: 'Playfair Display', serif;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.contact-form-card > p {
-    color: var(--dark-gray);
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-}
-
-.contact-form .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.contact-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
+.contact-form .form-group {display:flex;flex-direction:column;}
 .contact-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    font-size: 0.95rem;
+  font-size:.8rem;font-weight:600;color:#2c3e50;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem;
 }
-
-.contact-form label i {
-    margin-right: 0.5rem;
-    color: var(--accent-color);
-}
-
 .contact-form .form-control {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid var(--medium-gray);
-    border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: var(--light-gray);
+  width:100%;padding:.85rem .9rem;border:2px solid #d9dde3;border-radius:12px;font-family:inherit;
+  font-size:.85rem;transition:.25s;background:#fff;
 }
-
 .contact-form .form-control:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: white;
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+  outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.18);
 }
+.contact-form textarea.form-control {min-height:140px;resize:vertical;line-height:1.5;}
 
-.contact-form textarea.form-control {
-    resize: vertical;
-    min-height: 150px;
+.btn-submit {
+  background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:14px;
+  padding:.95rem 1.4rem;font-weight:600;font-size:.85rem;display:inline-flex;align-items:center;gap:.6rem;
+  cursor:pointer;transition:.3s;
 }
+.btn-submit:hover {filter:brightness(1.07);transform:translateY(-2px);}
 
-.contact-form .btn-submit {
-    width: 100%;
-    padding: 1.2rem;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.contact-form .btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
-}
-
-.contact-form .btn-submit i {
-    transition: transform 0.3s ease;
-}
-
-.contact-form .btn-submit:hover i {
-    transform: translateX(5px);
-}
-
-/* Map Section */
-.map-section {
-    padding: 0;
-    margin-top: 5rem;
-}
-
+.map-section {margin:3.5rem 0 0;}
 .map-container {
-    height: 500px;
-    border-radius: 25px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    animation: fadeInUp 0.8s ease;
+  height:500px;border-radius:25px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.1);
+  background:#eef1f6;
+}
+/* Leaflet map sizing */
+#contactMap { width: 100%; height: 500px; }
+
+.cta-section {padding:4rem 0;background:#fff;}
+.cta-box {
+  max-width:1050px;margin:0 auto;background:linear-gradient(135deg,#667eea,#764ba2);
+  color:#fff;padding:3rem 2rem;border-radius:25px;display:flex;flex-direction:column;align-items:center;text-align:center;
+  box-shadow:0 15px 50px rgba(102,126,234,.35);
+}
+.cta-box h2 {margin:0 0 1rem;font-size:2rem;font-weight:700;}
+.cta-box p {margin:0 0 2rem;font-size:.95rem;max-width:680px;line-height:1.6;opacity:.95;}
+.cta-actions {display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;}
+.cta-btn {
+  background:#fff;color:#667eea;padding:.9rem 1.4rem;border-radius:14px;font-size:.85rem;font-weight:600;
+  text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:.3s;
+}
+.cta-btn:hover {background:#f0f2f6;}
+.cta-btn.secondary {background:#2c3e50;color:#fff;}
+.cta-btn.secondary:hover {background:#1b2732;}
+
+@media (max-width:768px){
+  .contact-hero {padding:3rem 0 2.4rem;}
+  .contact-hero h1 {font-size:2.1rem;}
+  .contact-wrapper {padding:0 1rem;}
+  .contact-info-card, .contact-form-card {padding:1.5rem;}
+  #contactMap {height:380px;}
+  .cta-box {padding:2.4rem 1.6rem;}
+  .cta-box h2 {font-size:1.7rem;}
+  .form-row {grid-template-columns:1fr;}
+}
+@media (max-width:480px){
+  .contact-hero h1 {font-size:1.9rem;}
+  #contactMap {height:320px;}
+  .cta-box h2 {font-size:1.5rem;}
+  .cta-actions {flex-direction:column;}
 }
 
-.map-container iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-}
-
-/* Quick Stats */
-.quick-stats-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 4rem 0;
-    margin-top: 5rem;
-}
-
-.quick-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-}
-
-.stat-item {
-    text-align: center;
-    color: white;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-10px);
-}
-
-.stat-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.9;
-}
-
-.stat-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
-/* Animations */
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
+/* Fade animation */
+.fade-in-up {animation:fadeInUp .6s both;}
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive */
-@media (max-width: 968px) {
-    .contact-wrapper {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-hero h1 {
-        font-size: 2.5rem;
-    }
-    
-    .contact-form .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .contact-hero {
-        padding: 6rem 0 3rem;
-    }
-    
-    .contact-hero h1 {
-        font-size: 2rem;
-    }
-    
-    .contact-hero p {
-        font-size: 1.1rem;
-    }
-    
-    .contact-info-card,
-    .contact-form-card {
-        padding: 2rem;
-    }
-    
-    .map-container {
-        height: 350px;
-    }
+  0% {opacity:0;transform:translateY(18px);}
+  100% {opacity:1;transform:translateY(0);}
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Contact Hero -->
 <section class="contact-hero">
-    <div class="contact-hero-content">
-        <div class="container">
-            <h1>Get In <span class="highlight">Touch</span></h1>
-            <p>We're here to help you find your dream property</p>
-        </div>
-    </div>
+  <div class="container fade-in-up">
+    <h1>Get In <span class="highlight">Touch</span></h1>
+    <p>We're here to help you find your dream property</p>
+  </div>
 </section>
 
-<!-- Contact Main Section -->
 <section class="contact-main">
-    <div class="container">
-        <div class="contact-wrapper">
-            <!-- Contact Info Card -->
-            <div class="contact-info-card">
-                <h2>Let's Connect</h2>
-                <p>Have questions? We're here to help! Reach out to us through any of the following channels.</p>
-                
-                <div class="info-items">
-                    <div class="info-box">
-                        <div class="info-box-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <h4>Visit Us</h4>
-                            <p>123 Real Estate Avenue<br>Mumbai, Maharashtra 400001<br>India</p>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <h4>Call Us</h4>
-                            <p>
-                                <a href="tel:+919876543210">+91 98765 43210</a><br>
-                                <a href="tel:+918765432109">+91 87654 32109</a>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <h4>Email Us</h4>
-                            <p>
-                                <a href="mailto:info@premiumestate.com">info@premiumestate.com</a><br>
-                                <a href="mailto:sales@premiumestate.com">sales@premiumestate.com</a>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <h4>Working Hours</h4>
-                            <p>
-                                Monday - Saturday<br>
-                                9:00 AM - 6:00 PM<br>
-                                Sunday: Closed
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- <div class="social-connect">
-                    <h3>Follow Us</h3>
-                    <div class="social-icons">
-                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div> -->
+  <div class="container">
+    <div class="contact-wrapper">
+      <!-- Info Card -->
+      <div class="contact-info-card fade-in-up">
+        <h2><i class="fas fa-handshake"></i> Let's Connect</h2>
+        <p>Have questions? Reach out through any channel below and our team will respond promptly.</p>
+
+        <div class="info-items">
+          <div class="info-box">
+            <div class="info-box-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="info-box-content">
+              <h4>Office Address</h4>
+              <span>Premium Estate, Mumbai, Maharashtra, India</span>
             </div>
-            
-            <!-- Contact Form Card -->
-            <div class="contact-form-card">
-                <h2>Send Us A Message</h2>
-                <p>Fill out the form below and we'll get back to you as soon as possible.</p>
-                
-                <form method="post" action="{{ url_for('submit_enquiry') }}" class="contact-form">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> Full Name</label>
-                            {{ form.name(class="form-control", placeholder="John Doe") }}
-                        </div>
-                        
-                        <div class="form-group">
-                            <label><i class="fas fa-envelope"></i> Email Address</label>
-                            {{ form.email(class="form-control", placeholder="john@example.com") }}
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-phone"></i> Phone Number</label>
-                        {{ form.phone(class="form-control", placeholder="+91 98765 43210") }}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label><i class="fas fa-comment"></i> Your Message</label>
-                        {{ form.message(class="form-control", rows="6", placeholder="Tell us about your requirements...") }}
-                    </div>
-                    
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-paper-plane"></i> Send Message
-                    </button>
-                </form>
+          </div>
+
+          <div class="info-box">
+            <div class="info-box-icon"><i class="fas fa-phone"></i></div>
+            <div class="info-box-content">
+              <h4>Phone</h4>
+              <a href="tel:+919876543210">+91 98765 43210</a>
+              <a href="tel:+919812345678">+91 98123 45678</a>
             </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-box-icon"><i class="fas fa-envelope"></i></div>
+            <div class="info-box-content">
+              <h4>Email</h4>
+              <a href="mailto:info@premiumestate.com">info@premiumestate.com</a>
+              <a href="mailto:sales@premiumestate.com">sales@premiumestate.com</a>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-box-icon"><i class="fas fa-clock"></i></div>
+            <div class="info-box-content">
+              <h4>Hours</h4>
+              <span>Mon - Sat: 9:00 AM - 7:00 PM</span>
+              <span>Sun: Closed</span>
+            </div>
+          </div>
         </div>
+
+        <div style="margin-top:1.3rem;">
+          <h4 style="margin:0 0 .6rem;font-size:.9rem;color:#2c3e50;font-weight:600;">Follow Us</h4>
+          <div class="social-mini">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="contact-form-card fade-in-up">
+        <h2><i class="fas fa-paper-plane"></i> Send Us A Message</h2>
+        <p>Fill out the form and we will get back to you as soon as possible.</p>
+
+        <form method="post" action="{{ url_for('submit_enquiry') }}" class="contact-form">
+          {{ form.hidden_tag() }}
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Full Name</label>
+              {{ form.name(class="form-control", placeholder="John Doe") }}
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-envelope"></i> Email Address</label>
+              {{ form.email(class="form-control", placeholder="john@example.com") }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Phone Number</label>
+            {{ form.phone(class="form-control", placeholder="+91 98765 43210") }}
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-comment"></i> Your Message</label>
+            {{ form.message(class="form-control", rows="6", placeholder="Tell us about your requirements...") }}
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- Quick Stats -->
-<!-- <section class="quick-stats-section">
-    <div class="container">
-        <div class="quick-stats-grid">
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-value">24/7</div>
-                <div class="stat-label">Customer Support</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <div class="stat-value">&lt;2hrs</div>
-                <div class="stat-label">Response Time</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="stat-value">100%</div>
-                <div class="stat-label">Verified Properties</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-smile"></i>
-                </div>
-                <div class="stat-value">1200+</div>
-                <div class="stat-label">Happy Clients</div>
-            </div>
-        </div>
-    </div>
-</section> -->
-
-<!-- Map Section -->
+<!-- Map Section (OpenStreetMap via Leaflet) -->
 <section class="map-section">
-    <div class="container">
-        <div class="map-container">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d241317.14571765626!2d72.71637021640625!3d19.082177500000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin" 
-                allowfullscreen="" 
-                loading="lazy">
-            </iframe>
-        </div>
-    </div>
+  <div class="container fade-in-up">
+    <div id="contactMap" class="map-container"></div>
+  </div>
 </section>
 
-<!-- CTA Section -->
-<section class="cta-section" style="margin-top: 5rem;">
-    <div class="container">
-        <div class="cta-content fade-in-up">
-            <h2>Ready to Find Your Dream Property?</h2>
-            <p>Browse our exclusive collection of premium properties</p>
-            <div class="cta-buttons">
-                <a href="{{ url_for('properties') }}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-search"></i> Browse Properties
-                </a>
-            </div>
-        </div>
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box fade-in-up">
+      <h2>Ready to Discover Premium Properties?</h2>
+      <p>Explore exclusive plots and land investments curated by our expert team. Book a site visit, set property alerts, or reach out for personalized guidance.</p>
+      <div class="cta-actions">
+        <a href="{{ url_for('properties') }}" class="cta-btn"><i class="fas fa-search"></i> Browse Properties</a>
+        {% if not session.user_id %}
+          <a href="{{ url_for('user_register') }}" class="cta-btn secondary"><i class="fas fa-user-plus"></i> Create Account</a>
+        {% else %}
+          <a href="{{ url_for('user_dashboard') }}" class="cta-btn secondary"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        {% endif %}
+      </div>
     </div>
+  </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet (OpenStreetMap) -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script>
+window.addEventListener('load', function(){
+  const el = document.getElementById('contactMap');
+  if(!el || !window.L) return;
+
+  // Default center: Mumbai
+  const center = [19.0760, 72.8777];
+  const map = L.map(el, { scrollWheelZoom: false }).setView(center, 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  L.marker(center).addTo(map).bindPopup('Premium Estate HQ');
+});
+</script>
 {% endblock %}

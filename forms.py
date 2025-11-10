@@ -56,6 +56,7 @@ class PropertyAlertForm(FlaskForm):
                                        ('Commercial Plot', 'Commercial Plot'),
                                        ('Agricultural Land', 'Agricultural Land'),
                                        ('Industrial Plot', 'Industrial Plot')],
+                                       
                                validators=[Optional()])
     min_price = FloatField('Min Price (₹)', validators=[Optional(), NumberRange(min=0)])
     max_price = FloatField('Max Price (₹)', validators=[Optional(), NumberRange(min=0)])
