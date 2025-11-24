@@ -8,9 +8,4 @@ email-validator==2.0.0
 Pillow==10.0.0
 python-dotenv==1.0.0
 Werkzeug==2.3.7
-<<<<<<< HEAD
 Flask-Mail==0.9.1
-=======
-gunicorn==21.2.0
-psycopg2-binary==2.9.9
->>>>>>> 2fa1eb8c78751cfe49b1054435e37c76fa581821
